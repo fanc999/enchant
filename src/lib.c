@@ -129,16 +129,31 @@ enchant_get_conf_dirs (void)
 	char *sysconfdir = NULL;
 	char *pkgconfdir = NULL;
 	char *user_config_dir = NULL;
+	char *prefix = NULL;
+	char *datadir = NULL;
+	char *confdir = NULL;
 
-	if ((pkgdatadir = enchant_relocate (PKGDATADIR)) == NULL)
+#ifdef G_OS_WIN32
+	prefix = g_win32_get_package_installation_directory_of_module (NULL);
+	datadir = g_build_filename (prefix, "share", "enchant-2", NULL);
+	confdir = g_build_filename (prefix, "etc", NULL);
+	g_free (prefix);
+#else
+	datadir = g_strdup (PKGDATADIR);
+	confdir = g_strdup (SYSCONFDIR);
+#endif
+
+	if ((pkgdatadir = enchant_relocate (datadir)) == NULL)
 		goto error_exit;
 	conf_dirs = g_slist_append (conf_dirs, pkgdatadir);
 
-	if ((sysconfdir = enchant_relocate (SYSCONFDIR)) == NULL)
+	if ((sysconfdir = enchant_relocate (confdir)) == NULL)
 		goto error_exit;
 	if ((pkgconfdir = g_build_filename (sysconfdir, "enchant", NULL)) == NULL)
 		goto error_exit;
 	conf_dirs = g_slist_append (conf_dirs, pkgconfdir);
+	free (datadir);
+	free (confdir);
 	free (sysconfdir);
 
 	if ((user_config_dir = enchant_get_user_config_dir ()) == NULL)
@@ -881,7 +896,21 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	char *module_dir = enchant_relocate (PKGLIBDIR "-" ENCHANT_MAJOR_VERSION);
+	char *prefix = NULL;
+	char *libdir = NULL;
+	char *enchantlibsubdir = NULL;
+	char *module_dir = NULL;
+#ifdef G_OS_WIN32
+	prefix = g_win32_get_package_installation_directory_of_module (NULL);
+	enchantlibsubdir = g_strconcat ("enchant-", ENCHANT_MAJOR_VERSION, NULL);
+	libdir = g_build_filename (prefix, "lib", enchantlibsubdir, NULL);
+	module_dir = enchant_relocate (libdir);
+	g_free (libdir);
+	g_free (enchantlibsubdir);
+	g_free (prefix);
+#else
+	module_dir = enchant_relocate (PKGLIBDIR "-" ENCHANT_MAJOR_VERSION);
+#endif
 	if (module_dir)
 		enchant_load_providers_in_dir (broker, module_dir);
 	free (module_dir);
@@ -1470,14 +1499,25 @@ enchant_get_user_language(void)
 char *
 enchant_get_prefix_dir(void)
 {
+#ifdef G_OS_WIN32
+	return g_win32_get_package_installation_directory_of_module (NULL);
+#else
 	return enchant_relocate (INSTALLPREFIX);
+#endif
 }
 
 void
 enchant_set_prefix_dir(const char *new_prefix)
 {
+	char *prefix = NULL;
 #ifdef ENABLE_RELOCATABLE
+#ifdef G_OS_WIN32
+	prefix = g_win32_get_package_installation_directory_of_module (NULL);
+	set_relocation_prefix (prefix, new_prefix);
+	g_free (prefix);
+#else
 	set_relocation_prefix (INSTALLPREFIX, new_prefix);
+#endif
 #else
 	(void)new_prefix;
 #endif
