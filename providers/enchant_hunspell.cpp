@@ -53,6 +53,7 @@
 #endif
 
 #include <glib.h>
+#include <gmodule.h>
 
 /***************************************************************************/
 
@@ -487,6 +488,7 @@ hunspell_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 	return "Hunspell Provider";
 }
 
+G_MODULE_EXPORT
 EnchantProvider *init_enchant_provider (void);
 
 EnchantProvider *
