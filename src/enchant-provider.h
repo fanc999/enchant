@@ -49,9 +49,12 @@ typedef struct str_enchant_provider EnchantProvider;
  *
  * The returned string should be free'd with free.
  */
+ENCHANT_API
 char *enchant_get_user_language(void);
 
+ENCHANT_API
 char *enchant_get_user_config_dir (void);
+ENCHANT_API
 GSList *enchant_get_conf_dirs (void);
 
 /**
@@ -66,6 +69,7 @@ GSList *enchant_get_conf_dirs (void);
  * Returns: the prefix dir. Must be free'd.
  *
  */
+ENCHANT_API
 char *enchant_get_prefix_dir(void);
 
 /**
@@ -76,6 +80,7 @@ char *enchant_get_prefix_dir(void);
  *
  * Returns: the relocated path. Must be free'd.
  */
+ENCHANT_API
 char *enchant_relocate (const char *path);
 
 /**
@@ -86,6 +91,7 @@ char *enchant_relocate (const char *path);
  * Sets the current runtime error to @err. This API is private to the
  * providers.
  */
+ENCHANT_API
 void enchant_dict_set_error (EnchantDict * dict, const char * const err);
 
 /**
@@ -96,6 +102,7 @@ void enchant_dict_set_error (EnchantDict * dict, const char * const err);
  * Sets the current runtime error to @err. This API is private to
  * the providers.
  */
+ENCHANT_API
 void enchant_provider_set_error (EnchantProvider * provider, const char * const err);
 
 struct str_enchant_dict
